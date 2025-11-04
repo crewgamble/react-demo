@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import List, Literal, Optional, Dict
 from datetime import datetime
@@ -10,7 +11,10 @@ app = FastAPI(title="Demo API")
 # Permissive for local dev; lock down later in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # change to your Vercel domain later
+    allow_origins=[
+        "http://localhost:5173",
+        "https://YOUR-VERCEL-APP.vercel.app",  # TODO: replace with your real Vercel URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,10 +59,19 @@ def seed():
 
 seed()
 
+# ---- nice-to-have root + health ----
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/docs")  # or: return {"ok": True, "service": "Demo API"}
+
+@app.get("/healthz", include_in_schema=False)
+def healthz():
+    return {"ok": True}
+
+# ---- CRUD ----
 @app.get("/tickets", response_model=List[Ticket])
 async def list_tickets():
-    # newest first
-    return list(DB.values())[::-1]
+    return list(DB.values())[::-1]  # newest first
 
 @app.post("/tickets", response_model=Ticket, status_code=201)
 async def create_ticket(body: TicketCreate):
@@ -78,7 +91,9 @@ async def update_ticket(ticket_id: str, body: TicketUpdate):
     if ticket_id not in DB:
         raise HTTPException(status_code=404, detail="Not found")
     current = DB[ticket_id]
-    updated = current.copy(update={k: v for k, v in body.dict().items() if v is not None})
+    # pydantic v2-friendly: body.model_dump(exclude_unset=True)
+    updates = body.model_dump(exclude_unset=True)
+    updated = current.copy(update=updates)
     DB[ticket_id] = updated
     return updated
 
