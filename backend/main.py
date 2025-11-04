@@ -13,7 +13,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://react-demo-sand-sigma.vercel.app/",  # TODO: replace with your real Vercel URL
+        "https://react-demo-sand-sigma.vercel.app/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
