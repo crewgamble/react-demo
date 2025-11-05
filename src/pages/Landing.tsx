@@ -96,7 +96,15 @@ export default function Landing() {
 [
   { "id": "T-1001", "title": "Login bug on /auth", "status": "Open" },
   { "id": "T-1002", "title": "Upgrade dependencies", "status": "In Progress" }
-]`}
+]`},
+                {`POST https://react-demo-p3sd.onrender.com/tickets
+                  {
+                    "title": "Title Class",
+                    "status": "Ticket Status",
+                    "priority": "Priority",
+                    "assignee": "Name"
+                  }
+                `}
               </pre>
             </div>
           </div>
