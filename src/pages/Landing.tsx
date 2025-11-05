@@ -91,20 +91,15 @@ export default function Landing() {
             <div className="rounded-xl border bg-zinc-50 p-4 font-mono text-xs dark:bg-zinc-950">
               <p>// Simple fetch to your FastAPI backend</p>
               <pre className="whitespace-pre-wrap">
-{`GET /tickets
-200 OK
-[
-  { "id": "T-1001", "title": "Login bug on /auth", "status": "Open" },
-  { "id": "T-1002", "title": "Upgrade dependencies", "status": "In Progress" }
-]`},
-                {`POST https://react-demo-p3sd.onrender.com/tickets
+{`POST https://react-demo-p3sd.onrender.com/tickets
                   {
                     "title": "Title Class",
                     "status": "Ticket Status",
                     "priority": "Priority",
                     "assignee": "Name"
                   }
-                `}
+                `},
+
               </pre>
             </div>
           </div>
