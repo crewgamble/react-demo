@@ -17,6 +17,26 @@ export default function DemoApi() {
     const filtered = useMemo(() => items.filter(t => t.title.toLowerCase().includes(query.toLowerCase()) || t.assignee.toLowerCase().includes(query.toLowerCase())), [items, query]);
 
 
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [draft, setDraft] = useState<{ title: string; status: string; priority: string; assignee: string } | null>(null);
+
+    function startEdit(t: { id: string; title: string; status: string; priority: string; assignee: string }) {
+    setEditingId(t.id);
+    setDraft({ title: t.title, status: t.status, priority: t.priority, assignee: t.assignee });
+    }
+    function cancelEdit() {
+    setEditingId(null);
+    setDraft(null);
+    }
+    function saveEdit(id: string) {
+    if (!draft) return;
+    updateMut.mutate(
+        { id, ...draft }, // backend supports partials; sending full draft is fine
+        { onSuccess: () => cancelEdit() }
+    );
+    }
+
+
     return (
         
 
@@ -67,22 +87,100 @@ export default function DemoApi() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((t) => (
-                                    <tr key={t.id} className="border-b last:border-none">
+                                {filtered.map((t) => {
+                                    const isEditing = editingId === t.id;
+                                    return (
+                                    <tr key={t.id} className="border-b last:border-none align-top">
                                         <td className="py-2 pr-3 font-mono text-xs text-zinc-500">{t.id}</td>
-                                        <td className="py-2 pr-3 truncate max-w-[20ch] sm:max-w-none">{t.title}</td>
-                                        <td className="py-2 pr-3">{t.status}</td>
-                                        <td className="py-2 pr-3">{t.priority}</td>
-                                        <td className="py-2 pr-3">{t.assignee}</td>
+
+                                        {/* Title */}
+                                        <td className="py-2 pr-3">
+                                        {isEditing ? (
+                                            <input
+                                            className="w-full rounded-lg border px-2 py-1 text-sm"
+                                            value={draft?.title ?? ""}
+                                            onChange={(e) => setDraft((d) => ({ ...(d as any), title: e.target.value }))}
+                                            />
+                                        ) : (
+                                            t.title
+                                        )}
+                                        </td>
+
+                                        {/* Status */}
+                                        <td className="py-2 pr-3">
+                                        {isEditing ? (
+                                            <select
+                                            className="w-full rounded-lg border px-2 py-1 text-sm bg-zinc-900"
+                                            value={draft?.status ?? ""}
+                                            onChange={(e) => setDraft((d) => ({ ...(d as any), status: e.target.value }))}
+                                            >
+                                            <option>Open</option>
+                                            <option>In Progress</option>
+                                            <option>Closed</option>
+                                            </select>
+                                        ) : (
+                                            t.status
+                                        )}
+                                        </td>
+
+                                        {/* Priority */}
+                                        <td className="py-2 pr-3">
+                                        {isEditing ? (
+                                            <select
+                                            className="w-full rounded-lg border px-2 py-1 text-sm bg-zinc-900"
+                                            value={draft?.priority ?? ""}
+                                            onChange={(e) => setDraft((d) => ({ ...(d as any), priority: e.target.value }))}
+                                            >
+                                            <option>Low</option>
+                                            <option>Medium</option>
+                                            <option>High</option>
+                                            </select>
+                                        ) : (
+                                            t.priority
+                                        )}
+                                        </td>
+
+                                        {/* Assignee */}
+                                        <td className="py-2 pr-3">
+                                        {isEditing ? (
+                                            <input
+                                            className="w-full rounded-lg border px-2 py-1 text-sm bg-zinc-900"
+                                            value={draft?.assignee ?? ""}
+                                            onChange={(e) => setDraft((d) => ({ ...(d as any), assignee: e.target.value }))}
+                                            />
+                                        ) : (
+                                            t.assignee
+                                        )}
+                                        </td>
+
+                                        {/* Actions */}
                                         <td className="py-2 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <button className="rounded-lg border px-2 py-1" onClick={() => updateMut.mutate({ id: t.id, title: t.title + " (edited)" })}>Edit</button>
-                                                <button className="rounded-lg border px-2 py-1 text-red-600" onClick={() => deleteMut.mutate(t.id)}>Delete</button>
-                                            </div>
+                                        <div className="flex justify-end gap-2">
+                                            {isEditing ? (
+                                            <>
+                                                <button
+                                                className="rounded-lg border px-2 py-1"
+                                                onClick={() => saveEdit(t.id)}
+                                                disabled={updateMut.isPending}
+                                                >
+                                                {updateMut.isPending ? "Saving…" : "Save"}
+                                                </button>
+                                                <button className="rounded-lg border px-2 py-1" onClick={cancelEdit}>Cancel</button>
+                                            </>
+                                            ) : (
+                                            <>
+                                                <button className="rounded-lg border px-2 py-1" onClick={() => startEdit(t)}>Edit</button>
+                                                <button className="rounded-lg border px-2 py-1 text-red-600" onClick={() => deleteMut.mutate(t.id)}>
+                                                Delete
+                                                </button>
+                                            </>
+                                            )}
+                                        </div>
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
+                                    );
+                                })}
+                                </tbody>
                         </table>
                     )}
                 </div>
