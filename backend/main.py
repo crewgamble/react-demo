@@ -11,11 +11,12 @@ app = FastAPI(title="Demo API")
 # Permissive for local dev; lock down later in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_origin_regex=r"^https://.*\.vercel\.app$",
-    allow_credentials=False,
+    allow_origins=["http://localhost:5173"],               
+    allow_origin_regex=r"^https://.*\.vercel\.app$",       
+    allow_credentials=False,                               
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=600,
 )
 
 Status = Literal["Open", "In Progress", "Closed"]
