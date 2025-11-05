@@ -17,7 +17,6 @@ export default function Landing() {
           </Link>
 
           <nav className="ml-auto hidden items-center gap-1 md:flex">
-            <NavItem to="/">Home</NavItem>
             <NavItem to="/v1">UI v1</NavItem>
             <NavItem to="/v2">UI v2</NavItem>
             <Link
